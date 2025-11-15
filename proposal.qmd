@@ -1,8 +1,8 @@
 ---
 title: "Proposal title"
-subtitle: "Proposal"
+subtitle: "Generating Synthetic Health Data from NHANES (2015–2020) Using GANs"
 author: 
-  - name: "Team Name - Team member 1, Team member 2,..."
+  - name: "Peng Chen - solo"
     affiliations:
       - name: "College of Information Science, University of Arizona"
 description: "Project description"
@@ -32,14 +32,20 @@ import numpy as np
 #| message: false
 ```
 
-A brief description of your dataset including its provenance, dimensions, etc. as well as the reason why you chose this dataset.
+The National Health and Nutrition Examination Survey (NHANES) is a major program that assesses the health and nutritional status of adults and children in the United States by combining interviews with physical examinations. Each year about 5,000 participants are examined, providing a representative snapshot of the U.S. population’s health. In this project, we will leverage NHANES data from 2015–2016 and 2017–March 2020 (pre-pandemic) cycles to model baseline (pre-COVID) human health and nutrition status.
 
-Make sure to load the data and use inline code for some of this information.
+I will use a Python script `get_xpt_files_from_NHANES.py` to scrape NHANES website since the data files are in .xpt (SAS) format and they are quite numbered.
+
+The data files will be curated, cleaned and combined into a single Pandas DataFrame object, which will be used to train the GAN.
 
 ## Questions
 
-The two questions you want to answer.
+Q1: Do the synthetic patient data follow the same distribution as the training dataset?
+Q2: Do the synthetic patient data improve the ordinal regression classifier as compared to the original dataset?
 
 ## Analysis plan
 
--   A plan for answering each of the questions including the variables involved, variables to be created (if any), external data to be merged in (if any).
+- Build a Data Pipeline
+- Train a GAN Model
+- Evaluate Synthetic Data distribution
+- Compare the ordinal regression model between original and synthetic data
