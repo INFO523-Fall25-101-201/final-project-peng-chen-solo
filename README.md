@@ -3,5 +3,12 @@
 
 Final project repo for INFO 523 - Summer 2025.
 
+## Set up conda env
+- Follow the README doc in tabDDPM repos to setup a conda env:
+https://github.com/yandex-research/tab-ddpm
+- Clone the TabDDPM repo:
+git clone https://github.com/yandex-research/tab-ddpm.git
+
+
 #### Disclosure:
 Derived from the original data viz course by Mine Çetinkaya-Rundel @ Duke University
