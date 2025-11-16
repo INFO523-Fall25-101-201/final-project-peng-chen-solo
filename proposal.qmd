@@ -60,7 +60,7 @@ Q1: Do the synthetic patient data follow the same distribution as the training d
     -   I will use matplotlib and seaborn to visualize the distributions.
     -   Use Kolmogorov–Smirnov (KS) Test to see whether synthetic continuous variables follows the same distribution as in real data.
     -   Use Chi-SQ Test for categorical variables.
--   Compare the ordinal regression model between original and synthetic data
+-   Compare several machine learning classifiers between original and synthetic data
     -   I will include variables, e.g. BMI, blood pressure, HbA1c, TG and ALT, as predictors, and use OSA as the outcome.
     -   The machine learning models, including ordinal regression, decision tree, random forest, and XGboots models, will be built on real and synthetic data, respectively.
     -   I will compare the accuracy, precision, F1-score, and recall rate between real and synthetic, and draw a conclusion whether and to what extent synthetic data improved machine learning efficiency.
