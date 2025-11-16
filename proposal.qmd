@@ -25,6 +25,10 @@ jupyter: python3
 import numpy as np
 ```
 
+## Rationality
+
+The scarcity of medical health records hampers machine learning algorithms in accurately classifying patients and healthy. The imbalance of rare disease patients and their controls also restricted the statistical power of epidemiology studies and clinical trails. Generating synthetic medical records by generative AI has been proposed to solve these problems \[https://pubmed.ncbi.nlm.nih.gov/40758491/\].
+
 ## Dataset
 
 ```{python}
@@ -34,18 +38,29 @@ import numpy as np
 
 The National Health and Nutrition Examination Survey (NHANES) is a major program that assesses the health and nutritional status of adults and children in the United States by combining interviews with physical examinations. Each year about 5,000 participants are examined, providing a representative snapshot of the U.S. population’s health. In this project, we will leverage NHANES data from 2015–2016 and 2017–March 2020 (pre-pandemic) cycles to model baseline (pre-COVID) human health and nutrition status.
 
+The reason why limiting to pre-pandemic data is that COVID-19 infection may induce many unknown perturbations in the medical health variables of patients. For example, the infection can induce abnormal percentage of leukocytes and over-expression of inflammatory proteins. These will not appear without the infection.
+
 I will use a Python script `get_xpt_files_from_NHANES.py` to scrape NHANES website since the data files are in .xpt (SAS) format and they are quite numbered.
 
 The data files will be curated, cleaned and combined into a single Pandas DataFrame object, which will be used to train the GAN.
 
 ## Questions
 
-Q1: Do the synthetic patient data follow the same distribution as the training dataset?
-Q2: Do the synthetic patient data improve the ordinal regression classifier as compared to the original dataset?
+Q1: Do the synthetic patient data follow the same distribution as the training dataset? Q2: Do the synthetic patient data improve the ordinal regression classifier as compared to the original dataset?
 
 ## Analysis plan
 
-- Build a Data Pipeline
-- Train a GAN Model
-- Evaluate Synthetic Data distribution
-- Compare the ordinal regression model between original and synthetic data
+-   Build a Data Pipeline
+    -   use the skills learnt from INFO523 to clean, fill missing, and transform data
+    -   use pandas.Categorical to encode categorical data
+-   Train a GAN Model
+    -   I will train a TabDDPM model (available at https://github.com/yandex-research/tab-ddpm)
+    -   I will generate "obstructive sleep apnea" (OSA) patient and healthy control data
+-   Evaluate Synthetic Data distribution
+    -   I will use matplotlib and seaborn to visualize the distributions.
+    -   Use Kolmogorov–Smirnov (KS) Test to see whether synthetic continuous variables follows the same distribution as in real data.
+    -   Use Chi-SQ Test for categorical variables.
+-   Compare the ordinal regression model between original and synthetic data
+    -   I will include variables, e.g. BMI, blood pressure, HbA1c, TG and ALT, as predictors, and use OSA as the outcome.
+    -   The machine learning models, including ordinal regression, decision tree, random forest, and XGboots models, will be built on real and synthetic data, respectively.
+    -   I will compare the accuracy, precision, F1-score, and recall rate between real and synthetic, and draw a conclusion whether and to what extent synthetic data improved machine learning efficiency.
