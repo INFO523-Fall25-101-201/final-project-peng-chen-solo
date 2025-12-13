@@ -1,5 +1,5 @@
 ---
-title: "Project title"
+title: "Use Build ML models to Predict OSA"
 subtitle: "INFO 523 - Summer 2025 - Final Project"
 author: "Author names"
 title-slide-attributes:
@@ -22,8 +22,43 @@ execute:
 #| include: false
 
 # Load packages here
+import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 import seaborn as sns
+# Preprocessing 
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.decomposition import PCA
+
+# Model Selection and Evaluation
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
+from sklearn.metrics import (
+    roc_auc_score,
+    accuracy_score,
+    precision_score,
+    f1_score,
+    balanced_accuracy_score,
+    recall_score,
+    confusion_matrix
+)
+
+from sklearn.feature_selection import SelectFromModel, SequentialFeatureSelector
+
+# Machine Learning Models
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+
+import os
+import warnings
+warnings.filterwarnings("ignore")
 
 ```
 
@@ -45,10 +80,16 @@ plt.rcParams['figure.figsize'] = (6, 6 * 0.618)
 #| label: load-data
 #| include: false
 # Load data in Python
-mtcars = sns.load_dataset('mpg').dropna()  # mtcars dataset is similar to the mpg dataset from seaborn
-mtcars['speed'] = mtcars['horsepower'] / mtcars['weight']
+real = pd.read_csv('data/OSA_test2.csv')
+synth = pd.read.csv('results/synthetic_data.csv')
 
-penguins = sns.load_dataset('penguins').dropna()
+print(f"Real data shape: {real.shape}")
+print(f"Real patient:control:\n")
+print(real['osa_diag'].value_counts())
+
+print(f"Synthetic data shape: {synth.shape}")
+print(f"Synthetic patient:control:\n")
+print(synth['osa_diag'].value_counts())
 ```
 
 # Using Quarto for presentations
@@ -63,7 +104,7 @@ penguins = sns.load_dataset('penguins').dropna()
 
 You can use plain text
 
-::: columns
+::::: columns
 ::: {.column width="40%"}
 -   or bullet points[^1]
 :::
@@ -71,7 +112,7 @@ You can use plain text
 ::: {.column width="60%"}
 or in two columns
 :::
-:::
+:::::
 
 [^1]: And add footnotes
 
@@ -108,7 +149,7 @@ plt.show()
 
 ## Plot and text
 
-::: columns
+::::: columns
 ::: {.column width="50%"}
 -   Some text
 
@@ -124,7 +165,7 @@ sns.boxplot(data=penguins, x='bill_length_mm', y='species', hue='species', ax=ax
 plt.show()
 ```
 :::
-:::
+:::::
 
 # A new section...
 
