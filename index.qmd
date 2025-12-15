@@ -1,8 +1,8 @@
 ---
-title: "Project Title"
+title: "Build ML model on Synthetic Patient Data to Predict OSA Risk"
 subtitle: "INFO 523 - Final Project"
 author: 
-  - name: "Team name - Team member 1, Team member 2,..."
+  - name: "Peng Chen"
     affiliations:
       - name: "College of Information Science, University of Arizona"
 description: "Project description"
@@ -20,4 +20,10 @@ jupyter: python3
 
 ## Abstract
 
-Add project abstract here.
+Obstructive sleep apnea (OSA) risk prediction models are often limited by scarce labeled cases and severe class imbalance in real-world cohorts. Using a UK Biobank–derived dataset (221,269 participants; 2,304 OSA cases), I constructed a complete-case modeling table of 19,416 individuals with 136 OSA cases after dropping missing values across selected predictors.
+
+To address imbalance and enable privacy-preserving development, we trained an SDV CTGAN synthesizer conditional on OSA status and generated 40,000 synthetic records balanced 1:1 for OSA/control. Synthetic data fidelity was supported by SDV diagnostics (validity/structure score 100%) and a quality score of 90.1% (column shapes 91.65%; column pair trends 88.56%). I built an end-to-end machine learning pipeline with scaling/one-hot encoding, and L1-regularized logistic feature selection, yielding 16 retained features.
+
+Model selection across LASSO, random forest, k-nearest neighbors, Gaussian Naïve Bayes, and XGBoost identified an optimal synthetic-trained XGBoost model (learning rate 0.05; 800 estimators; max depth 3) achieving ROC-AUC 0.849 and accuracy 0.769 on a synthetic test set. In contrast, the best real-trained XGBoost model (learning rate 0.01; 200 estimators; max depth 3) showed ROC-AUC 0.856 but predicted all samples as non-OSA (F1/precision/recall = 0), indicating a degenerate classifier driven by imbalance. Cross-domain evaluation further demonstrated that the synthetic-trained model generalized to real test data with ROC-AUC 0.851 and high recall (0.793) but low precision (0.025), while the real-trained model failed on balanced synthetic test data (recall 0.0).
+
+Overall, conditional synthetic data generation mitigated class imbalance and enabled a practically useful role-out classifier, highlighting synthetic cohorts as a promising tool for both model development under limited case availability and stress-testing real-data models under balanced conditions.
