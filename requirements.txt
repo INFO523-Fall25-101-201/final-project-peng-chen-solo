@@ -1,7 +1,7 @@
 jupyter
 nbformat
 xgboost
-sklearn
+scikit-learn
 numpy
 pandas
 matplotlib

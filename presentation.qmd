@@ -78,7 +78,7 @@ warnings.filterwarnings("ignore")
 
 4.  Cross validation (real model & synthetic test data; synthetic model & real test data)
 
-5.  Result interpretaion
+5.  Result interpretation
 
 ## 1. Generate synthetic data
 
