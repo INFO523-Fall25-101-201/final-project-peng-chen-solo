@@ -22,45 +22,6 @@ execute:
 ::: panel-tabset
 ## Models
 
-```{python}
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-# Preprocessing 
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.pipeline import Pipeline
-from sklearn.impute import SimpleImputer
-from sklearn.decomposition import PCA
-
-# Model Selection and Evaluation
-from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
-from sklearn.metrics import (
-    roc_auc_score,
-    accuracy_score,
-    precision_score,
-    f1_score,
-    balanced_accuracy_score,
-    recall_score,
-    confusion_matrix
-)
-
-from sklearn.feature_selection import SelectFromModel, SequentialFeatureSelector
-
-# Machine Learning Models
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
-from sklearn.calibration import CalibratedClassifierCV
-from sklearn.naive_bayes import GaussianNB
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.naive_bayes import GaussianNB
-
-import os
-import warnings
-```
-
 ``` python
 import numpy as np
 import pandas as pd
@@ -124,15 +85,15 @@ warnings.filterwarnings("ignore")
 ::: panel-tabset
 ## Load data
 
-```{python}
+``` python
 dat = pd.read_csv('data/OSA_test2.csv')
 dat.info()
 dat['OSA'].value_counts()
 ```
 
-## Drop Missing 
+## Drop Missing
 
-```{python}
+``` python
 dat = dat.drop(columns=['f_20023_0_0', 'f_20023_1_0', 'f_4282_0_0', 'f_4282_1_0', 'Date', 'f_20016_0_0', 'f_20016_1_0', "f_eid", "IID"])
 dat = dat.drop(columns=[col for col in dat.columns if '_3_0' in col])
 dat = dat.dropna()
