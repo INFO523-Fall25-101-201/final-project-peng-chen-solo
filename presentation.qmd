@@ -10,6 +10,9 @@ title-slide-attributes:
 format:
   revealjs:
     theme:  ['data/customtheming.scss']
+    code-fold: true
+    code-block-max-height: "400px"
+    code-overflow: "scroll"
   
 editor: visual
 jupyter: python3
@@ -99,6 +102,8 @@ dat.info()
 dat['OSA'].value_counts()
 ```
 
+## Info and counts
+
 ```         
 <class 'pandas.core.frame.DataFrame'> 
 Index: 19416 entries, 2 to 221264 
@@ -141,9 +146,6 @@ Data columns (total 35 columns):
 33  f_25024_2_0  19416 non-null  float64  
 34  f_25023_2_0  19416 non-null  float64 
 dtypes: float64(30), object(5) memory usage: 5.3+ MB 
-```
-
-```         
 OSA 
 0    19280 
 1      136 
@@ -176,7 +178,7 @@ Gen. (-1.18) | Discrim. (-0.44): 100%|██████████| 1000/1000 
 
 ## Loss function
 
-![](images/ukb_synthesizer_osa_loss.png){fig-align="center" width="682"}
+![](images/ukb_synthesizer_osa_loss.png){fig-align="center" width="756"}
 :::
 
 ## 1. Generate synthetic data
@@ -352,9 +354,7 @@ num__PC1 num__BMI num__f_25886_2_0 num__f_25003_2_0 num__f_25001_2_0 num__f_2500
 ### Model selection
 
 -   Multiple models and a wide range of parameters.
-
 -   The optimal model: XGBoost model with learning_rate = 0.05, n_estimators=800 and max_depth=3. It has ROC_AUC=0.847.
-
 -   I tested the performance on synthetic test data:
 
 ```         
@@ -395,7 +395,6 @@ Confusion matrix:
 -   I further tested for two use cases of synthetic patient records
 
     -   Case 1: use the model built on **synthetic data** to predict OSA risk in **real data**. This resolves the clinical problem where limited patient data is available to build a model to predict disease risk.
-
     -   Case 2: use the model build on **real data** to predict OSA risk in **synthetic data**. This may be used to reduce the cost of clinical trails, where a large amount of participants are needed to access the efficacy and safety of a therapy.
 
 -   I evaluated the performance in these two cases.
