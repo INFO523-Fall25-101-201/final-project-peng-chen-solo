@@ -1,7 +1,7 @@
 ---
-title: "Project title"
+title: "Build ML model on Synthetic Patient Data to Predict OSA Risk"
 subtitle: "INFO 523 - Summer 2025 - Final Project"
-author: "Author names"
+author: "Peng Chen"
 title-slide-attributes:
   data-background-image: images/watercolour_sys02_img34_teacup-ocean.jpg
   data-background-size: stretch
@@ -10,6 +10,9 @@ title-slide-attributes:
 format:
   revealjs:
     theme:  ['data/customtheming.scss']
+    code-fold: true
+    code-block-max-height: "400px"
+    code-overflow: "scroll"
   
 editor: visual
 jupyter: python3
@@ -17,151 +20,446 @@ execute:
   echo: false
 ---
 
-```{python}
-#| label: load-packages
-#| include: false
+## Python modules used in this project
 
-# Load packages here
+::: panel-tabset
+## Models
+
+``` python
+import numpy as np
 import pandas as pd
-import seaborn as sns
-
-```
-
-```{python}
-#| label: setup
-#| include: false
-#| 
-# Set up plot theme and figure resolution
-sns.set_theme(style="whitegrid")
-sns.set_context("notebook", font_scale=1.1)
-
 import matplotlib.pyplot as plt
-plt.rcParams['figure.dpi'] = 300
-plt.rcParams['savefig.dpi'] = 300
-plt.rcParams['figure.figsize'] = (6, 6 * 0.618)
+import seaborn as sns
+# Preprocessing 
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.compose import ColumnTransformer
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.decomposition import PCA
+
+# Model Selection and Evaluation
+from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
+from sklearn.metrics import (
+    roc_auc_score,
+    accuracy_score,
+    precision_score,
+    f1_score,
+    balanced_accuracy_score,
+    recall_score,
+    confusion_matrix
+)
+
+from sklearn.feature_selection import SelectFromModel, SequentialFeatureSelector
+
+# Machine Learning Models
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from xgboost import XGBClassifier
+from sklearn.calibration import CalibratedClassifierCV
+from sklearn.naive_bayes import GaussianNB
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+
+import os
+import warnings
 ```
 
-```{python}
-#| label: load-data
-#| include: false
-# Load data in Python
-mtcars = sns.load_dataset('mpg').dropna()  # mtcars dataset is similar to the mpg dataset from seaborn
-mtcars['speed'] = mtcars['horsepower'] / mtcars['weight']
+## Settings
 
-penguins = sns.load_dataset('penguins').dropna()
-```
-
-# Using Quarto for presentations
-
-## Quarto
-
--   The presentation is created using the Quarto CLI
-
--   `##` sets the start of a new slide
-
-## Layouts
-
-You can use plain text
-
-::: columns
-::: {.column width="40%"}
--   or bullet points[^1]
-:::
-
-::: {.column width="60%"}
-or in two columns
-:::
-:::
-
-[^1]: And add footnotes
-
--   like
-
--   this
-
-## Code
-
-```{python}
-from sklearn.linear_model import LinearRegression
-import statsmodels.api as sm
-import pandas as pd
-
-# Fit a linear regression model
-X = mtcars[['speed']]
-y = mtcars['mpg']
-model = LinearRegression().fit(X, y)
-
-# Summary of the model
-X2 = sm.add_constant(X)
-est = sm.OLS(y, X2)
-est2 = est.fit()
-print(est2.summary())
-```
-
-## Plots
-
-```{python}
-penguins['species'] = penguins['species'].apply(lambda x: "Adelie" if x == "Adelie" else "Other")
-sns.scatterplot(data=penguins, x='flipper_length_mm', y='body_mass_g', hue='species')
-plt.show()
-```
-
-## Plot and text
-
-::: columns
-::: {.column width="50%"}
--   Some text
-
--   goes here
-:::
-
-::: {.column width="50%"}
-```{python}
-#| warning: false
-#| fig.width: 5.5
-fig, ax = plt.subplots(figsize=(5.5, 5.5 * 0.618))
-sns.boxplot(data=penguins, x='bill_length_mm', y='species', hue='species', ax=ax)
-plt.show()
+``` python
+warnings.filterwarnings("ignore")
 ```
 :::
-:::
 
-# A new section...
+## Project outline
 
-## Tables
+1.  Generate synthetic data
 
-If you want to generate a table, make sure it is in the HTML format (instead of Markdown or other formats), e.g.,
+2.  Train an optimal ML model using synthetic data
 
-```{python}
-penguins.head().to_html()
+3.  Train an optima ML model using real data
+
+4.  Cross validation (real model & synthetic test data; synthetic model & real test data)
+
+5.  Result interpretation
+
+## 1. Generate synthetic data
+
+::: panel-tabset
+## Load data
+
+``` python
+dat = pd.read_csv('data/OSA_test2.csv')
 ```
 
-## Images
+## Drop Missing
 
-![Image credit: Danielle Navarro, Percolate.](images/watercolour_sys02_img34_teacup-ocean.png){fig-align="center" width="500"}
+``` python
+dat = dat.drop(columns=['f_20023_0_0', 'f_20023_1_0', 'f_4282_0_0', 'f_4282_1_0', 'Date', 'f_20016_0_0', 'f_20016_1_0', "f_eid", "IID"])
+dat = dat.drop(columns=[col for col in dat.columns if '_3_0' in col])
+dat = dat.dropna()
+dat.info()
+dat['OSA'].value_counts()
+```
 
-## Math Expressions {.smaller}
-
-You can write LaTeX math expressions inside a pair of dollar signs, e.g. \$\\alpha+\\beta\$ renders $\alpha + \beta$. You can use the display style with double dollar signs:
+## Info and counts
 
 ```         
-$$\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i$$
+<class 'pandas.core.frame.DataFrame'> 
+Index: 19416 entries, 2 to 221264 
+Data columns (total 35 columns):  
+#   Column       Non-Null Count  Dtype   
+---  ------       --------------  -----    
+0   PC1          19416 non-null  float64  
+1   PC2          19416 non-null  float64  
+2   Male         19416 non-null  object    
+3   BMI          19416 non-null  float64  
+4   Age          19416 non-null  float64  
+5   OSA          19416 non-null  object    
+6   APOE_e4      19416 non-null  object    
+7   snoring      19416 non-null  object  
+8   centre       19416 non-null  object   
+9   f_25887_2_0  19416 non-null  float64  
+10  f_25886_2_0  19416 non-null  float64  
+11  f_25003_2_0  19416 non-null  float64  
+12  f_25004_2_0  19416 non-null  float64  
+13  f_25001_2_0  19416 non-null  float64  
+14  f_25002_2_0  19416 non-null  float64  
+15  f_25005_2_0  19416 non-null  float64  
+16  f_25006_2_0  19416 non-null  float64  
+17  f_25007_2_0  19416 non-null  float64  
+18  f_25008_2_0  19416 non-null  float64  
+19  f_25009_2_0  19416 non-null  float64  
+20  f_25010_2_0  19416 non-null  float64  
+21  f_25012_2_0  19416 non-null  float64  
+22  f_25011_2_0  19416 non-null  float64  
+23  f_25016_2_0  19416 non-null  float64  
+24  f_25015_2_0  19416 non-null  float64  
+25  f_25018_2_0  19416 non-null  float64  
+26  f_25017_2_0  19416 non-null  float64  
+27  f_25020_2_0  19416 non-null  float64  
+28  f_25019_2_0  19416 non-null  float64  
+29  f_25014_2_0  19416 non-null  float64  
+30  f_25013_2_0  19416 non-null  float64  
+31  f_25022_2_0  19416 non-null  float64  
+32  f_25021_2_0  19416 non-null  float64  
+33  f_25024_2_0  19416 non-null  float64  
+34  f_25023_2_0  19416 non-null  float64 
+dtypes: float64(30), object(5) memory usage: 5.3+ MB 
+OSA 
+0    19280 
+1      136 
+Name: count, dtype: int64
+```
+:::
+
+## 1. Generate synthetic data
+
+### Train GAN
+
+::: panel-tabset
+## Note
+
+-   I employed SDV CTGAN synthesizer
+
+-   Key to success:
+
+    -   Conditional on OSA, to balance patients and control
+
+    -   Tune epochs and learning rate so that losses converge
+
+```         
+Training SDV CTGAN synthesizer (conditional on OSA)... 
 ```
 
-$$
-\bar{X}=\frac{1}{n}\sum_{i=1}^nX_i
-$$
+```         
+Gen. (-1.18) | Discrim. (-0.44): 100%|██████████| 1000/1000 [31:08<00:00,  1.87s/it]
+```
 
-Limitations:
+## Loss function
 
-1.  The source code of a LaTeX math expression must be in one line, unless it is inside a pair of double dollar signs, in which case the starting `$$` must appear in the very beginning of a line, followed immediately by a non-space character, and the ending `$$` must be at the end of a line, led by a non-space character;
+![](images/ukb_synthesizer_osa_loss.png){fig-align="center" width="756"}
+:::
 
-2.  There should not be spaces after the opening `$` or before the closing `$`.
+## 1. Generate synthetic data
 
-# Wrap up
+### Data synthesis
 
-## Feeling adventurous?
+``` python
+n_samples = 40000 # total number of records to generate
+print(f"Generating {n_samples} synthetic samples balanced on osa_diag...")
+synth = generate_balanced_samples(
+    synthesizer=synthesizer,
+    n_samples=n_samples,
+    label_col="OSA",
+)
 
--   You are welcomed to use the default styling of the slides. In fact, that's what I expect majority of you will do. You will differentiate yourself with the content of your presentation.
+print("Synthetic osa_diag value counts:")
+print(synth["OSA"].value_counts(dropna=False))
+```
 
--   But some of you might want to play around with slide styling. Some solutions for this can be found at https://quarto.org/docs/presentations/revealjs.
+```         
+Generating 40000 synthetic samples balanced on osa_diag... 
+```
+
+```         
+Sampling conditions: 100%|██████████| 40000/40000 [00:16<00:00, 2455.99it/s]
+```
+
+```         
+Synthetic osa_diag value counts: 
+OSA 
+0    20000 
+1    20000 
+Name: count, dtype: int64
+```
+
+## 1. Generate synthetic data
+
+::: panel-tabset
+## Struture evaluation
+
+``` python
+from sdv.evaluation.single_table import run_diagnostic
+metadata = SingleTableMetadata()
+metadata.detect_from_dataframe(dat)
+diagnostic = run_diagnostic(
+    real_data=dat,
+    synthetic_data=synth,
+    metadata=metadata
+)
+```
+
+```         
+Generating report ...  
+(1/2) Evaluating Data Validity: |██████████| 35/35 [00:00<00:00, 663.53it/s]| 
+Data Validity Score: 100.0%  
+(2/2) Evaluating Data Structure: |██████████| 1/1 [00:00<00:00, 391.88it/s]| 
+Data Structure Score: 100.0%  
+Overall Score (Average): 100.0%
+```
+
+## Similarity evaluation
+
+``` python
+from sdv.evaluation.single_table import evaluate_quality
+quality_report = evaluate_quality(
+    dat,
+    synth,
+    metadata
+)
+```
+
+```         
+Generating report ...  
+(1/2) Evaluating Column Shapes: |██████████| 35/35 [00:00<00:00, 66.32it/s]| 
+Column Shapes Score: 91.65%  
+(2/2) Evaluating Column Pair Trends: |██████████| 595/595 [00:04<00:00, 121.03it/s]| 
+Column Pair Trends Score: 88.56%  
+Overall Score (Average): 90.1%
+```
+:::
+
+## 2. Train an optimal ML model
+
+::: panel-tabset
+## Preprocessing pipeline
+
+``` python
+numeric_features = synth_X.select_dtypes(include=["int64", "float64"]).columns.tolist()
+categorical_features = synth_X.select_dtypes(include=["object", "category"]).columns.tolist()
+
+numeric_transformer = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="median")),
+    ("scaler", StandardScaler())
+])
+
+categorical_transformer = Pipeline(steps=[
+    ("imputer", SimpleImputer(strategy="most_frequent")),
+    ("onehot", OneHotEncoder(handle_unknown="ignore", drop='first', sparse_output=False))
+])
+
+preprocess = ColumnTransformer(
+    transformers=[
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features)
+    ]
+)
+X_transformed = preprocess.fit_transform(synth_X)
+print(X_transformed.shape)
+```
+
+## PCA
+
+![](images/pca.png){fig-align="center"}
+:::
+
+## 2. Train an optimal ML model
+
+::: panel-tabset
+## Feature selection
+
+I employed LASSO regression to select relevant features.
+
+``` python
+# 1) L1-logistic as selector
+l1_selector_est = LogisticRegression(
+    penalty="l1",
+    solver="saga",
+    class_weight="balanced",
+    max_iter=1000
+)
+
+selector = SelectFromModel(
+    estimator=l1_selector_est,
+    max_features=X_transformed.shape[1],
+    threshold="median"
+)
+
+# 2) Pipeline: preprocess -> L1 selector
+fs_pipe = Pipeline(steps=[
+    ("preprocess", preprocess),  
+    ("select", selector)
+])
+
+# Fit on TRAIN ONLY
+fs_pipe.fit(X_train, y_train)
+
+# 3) Get transformed feature names and support mask
+preprocess_fitted = fs_pipe.named_steps["preprocess"]
+selector_fitted   = fs_pipe.named_steps["select"]
+
+all_feature_names = preprocess_fitted.get_feature_names_out()
+support_mask      = selector_fitted.get_support()
+
+selected_feature_names = all_feature_names[support_mask]
+```
+
+## Selected features
+
+``` python
+print("Number of selected features:", len(selected_feature_names))
+for f in selected_feature_names:
+    print(f)
+```
+
+```         
+Number of selected features: 16 
+num__PC1 num__BMI num__f_25886_2_0 num__f_25003_2_0 num__f_25001_2_0 num__f_25006_2_0 num__f_25007_2_0 num__f_25010_2_0 num__f_25015_2_0 num__f_25018_2_0 num__f_25019_2_0 num__f_25014_2_0 num__f_25013_2_0 num__f_25022_2_0 num__f_25021_2_0 cat__Male_1
+```
+:::
+
+## 2. Train an optimal ML model
+
+### Model selection
+
+-   Multiple models and a wide range of parameters.
+-   The optimal model: XGBoost model with learning_rate = 0.05, n_estimators=800 and max_depth=3. It has ROC_AUC=0.847.
+-   I tested the performance on synthetic test data:
+
+```         
+=== Final ML model on TEST set === 
+ROC-AUC:  0.849 
+Accuracy: 0.769 
+F1:       0.769 
+Precision:0.770 
+Recall:   0.767 
+Confusion matrix:  
+[[3082  918]  
+[ 930 3070]]
+```
+
+## 3. Train an optima ML model using real data
+
+The optimal model built on real data: XGBoost model, learning_rate=0.01, n_estimators=200, max_depth=3. ROC_AUC=0.856.
+
+Performance on real test data:
+
+```         
+=== Final ML model on TEST set === 
+ROC-AUC:  0.856 
+Accuracy: 0.993 
+F1:       0.000 
+Precision:0.000 
+Recall:   0.000 
+Confusion matrix:  
+[[3856    0]  
+[  29    0]]
+```
+
+## 4. Real x Synthetic cross-domain validation
+
+::: panel-tabset
+## Note
+
+-   I further tested for two use cases of synthetic patient records
+
+    -   Case 1: use the model built on **synthetic data** to predict OSA risk in **real data**. This resolves the clinical problem where limited patient data is available to build a model to predict disease risk.
+    -   Case 2: use the model build on **real data** to predict OSA risk in **synthetic data**. This may be used to reduce the cost of clinical trails, where a large amount of participants are needed to access the efficacy and safety of a therapy.
+
+-   I evaluated the performance in these two cases.
+
+## Synthetic-\>real
+
+Use model built on synthetic data to predict real data:
+
+```         
+=== SYNTHETIC ML model on REAL test set === 
+ROC-AUC:  0.851 
+Accuracy: 0.769 
+F1:       0.049 
+Precision:0.025 
+Recall:   0.793 
+Confusion matrix:  
+[[2964  892]  
+[   6   23]]
+```
+
+## Real-\>synthetic
+
+Use model built on real data to predict synthetic data:
+
+```         
+=== REAL ML model on SYNTHETIC test set === 
+ROC-AUC:  0.799 
+Accuracy: 0.500 
+F1:       0.000 
+Precision:0.000 
+Recall:   0.000 
+Confusion matrix:  
+[[4000    0]  
+[4000    0]]
+```
+:::
+
+## 5. Result interpretation
+
+### Problem of model built on real data
+
+-   The real data features imbalanced numbers of patients and controls.
+
+-   The model trained on real data apparently had a higher AUC (0.856) than synthetic model (0.849).
+
+-   Real model identified every record as healthy control (TP=0, FP=0).
+
+-   In use case 2, the real model behaved the same.
+
+-   I concluded: Without synthetic data, the model are biased by the imbalanced real data.
+
+## 5. Result interpretation
+
+**Advantage of model built on synthetic data**
+
+-   Synthetic data is balanced, meaning it has equal number of patients and healthy controls.
+
+-   On synthetic data, synthetic model gained reasonable metrics, including accuracy and AUC, meaning it is good at making correct decisions.
+
+-   In use case 1, synthetic model has low precision, meaning when it makes a positive classification, it is often wrong.
+
+-   However, this model may be used to rule out high risk people in clinical setting (if it says negative, it is often correct).
+
+## 5. Result interpretation
+
+**In summary, synthetic data is useful in improving disease risk prediction models.**
+
+# Thank You for Watching!

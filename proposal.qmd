@@ -1,8 +1,8 @@
 ---
-title: "Proposal title"
-subtitle: "Proposal"
+title: "Build a ML Model to Predict OSA Risk"
+subtitle: "Generating Balanced Synthetic Health Data from UKB Using GANs"
 author: 
-  - name: "Team Name - Team member 1, Team member 2,..."
+  - name: "Peng Chen - solo"
     affiliations:
       - name: "College of Information Science, University of Arizona"
 description: "Project description"
@@ -25,6 +25,10 @@ jupyter: python3
 import numpy as np
 ```
 
+## Rationality
+
+The scarcity of medical health records hampers machine learning algorithms in accurately classifying patients and healthy. The imbalance of rare disease patients and their controls also restricted the statistical power of epidemiology studies and clinical trails. Generating synthetic medical records by generative AI has been proposed to solve these problems \[https://pubmed.ncbi.nlm.nih.gov/40758491/\].
+
 ## Dataset
 
 ```{python}
@@ -32,14 +36,47 @@ import numpy as np
 #| message: false
 ```
 
-A brief description of your dataset including its provenance, dimensions, etc. as well as the reason why you chose this dataset.
+The National Health and Nutrition Examination Survey (NHANES) is a major program that assesses the health and nutritional status of adults and children in the United States by combining interviews with physical examinations. Each year about 5,000 participants are examined, providing a representative snapshot of the U.S. population’s health. In this project, we will leverage NHANES data from 2015–2016 and 2017–March 2020 (pre-pandemic) cycles to model baseline (pre-COVID) human health and nutrition status.
 
-Make sure to load the data and use inline code for some of this information.
+The reason why limiting to pre-pandemic data is that COVID-19 infection may induce many unknown perturbations in the medical health variables of patients. For example, the infection can induce abnormal percentage of leukocytes and over-expression of inflammatory proteins. These will not appear without the infection.
+
+I will use a Python script `get_xpt_files_from_NHANES.py` to scrape NHANES website since the data files are in .xpt (SAS) format and they are quite numbered.
+
+## Outcome
+
+Obstructive Sleep Apnea (OSA) is the most common sleep-related breathing disorder. It is characterized by repeated episodes of complete or partial collapse of the upper airway (throat) during sleep. While the primary problem in OSA is anatomical (airway blockage), research suggests that differences in the volume (size) of certain brain regions are both a consequence and a potential risk factor for the condition.
+
+## Aims
+
+This project aimed to build a ML model to predict the risk of OSA from demographic, biochemistry and brain region volume features. The advantage of this project lies in that the synthetic health records has 1) a balanced (1:1) OSA patients and healthy control composition, 2) much larger sample size, as compared with the real health records. I anticipate the synthetic data to improve ML model performance.
+
+### Modification 
+
+**I found it hard to reconcile NHANES clinical data to engineer the OSA diagnosis. I turned to UKB since I have a curated .csv file with real health data from it.**
+
+The UK Biobank (UKB) is a major program that assesses the cardiovascular disease risk of adults living in the United Kingdom by combining interviews with physical examinations. Brain MRI images were collected for a subset of the participants and the volumes of major brain regions were calculated by cardiologists.
+
+The data files will be curated, cleaned and combined into a single Pandas DataFrame object, which will be used to train the GAN.
 
 ## Questions
 
-The two questions you want to answer.
+Q1: Do the synthetic patient data follow the same distribution as the training dataset?
+
+Q2: Do the synthetic patient data improve the ordinal regression classifier as compared to the original dataset?
 
 ## Analysis plan
 
--   A plan for answering each of the questions including the variables involved, variables to be created (if any), external data to be merged in (if any).
+-   Build a Data Pipeline
+    -   use the skills learnt from INFO523 to clean, fill missing, and transform data
+    -   use pandas.Categorical to encode categorical data
+-   Train a GAN Model
+    -   I will train a TabDDPM model (available at https://github.com/yandex-research/tab-ddpm)
+    -   I will generate OSA patient and healthy control data at 1:1 ratio
+-   Evaluate Synthetic Data distribution
+    -   I will use matplotlib and seaborn to visualize the distributions.
+    -   Use Kolmogorov–Smirnov (KS) Test to see whether synthetic continuous variables follows the same distribution as in real data.
+    -   Use Chi-SQ Test for categorical variables.
+-   Compare several machine learning classifiers between original and synthetic data
+    -   I will include variables, e.g. BMI, blood pressure, HbA1c, TG and ALT, as predictors, and use OSA as the outcome.
+    -   The machine learning models, including ordinal regression, decision tree, random forest, and XGboots models, will be built on real and synthetic data, respectively.
+    -   I will compare the accuracy, precision, F1-score, and recall rate between real and synthetic, and draw a conclusion whether and to what extent synthetic data improved machine learning efficiency.
