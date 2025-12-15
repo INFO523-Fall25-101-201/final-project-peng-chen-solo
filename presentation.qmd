@@ -87,8 +87,6 @@ warnings.filterwarnings("ignore")
 
 ``` python
 dat = pd.read_csv('data/OSA_test2.csv')
-dat.info()
-dat['OSA'].value_counts()
 ```
 
 ## Drop Missing
@@ -99,6 +97,57 @@ dat = dat.drop(columns=[col for col in dat.columns if '_3_0' in col])
 dat = dat.dropna()
 dat.info()
 dat['OSA'].value_counts()
+```
+
+```         
+<class 'pandas.core.frame.DataFrame'> 
+Index: 19416 entries, 2 to 221264 
+Data columns (total 35 columns):  
+#   Column       Non-Null Count  Dtype   
+---  ------       --------------  -----    
+0   PC1          19416 non-null  float64  
+1   PC2          19416 non-null  float64  
+2   Male         19416 non-null  object    
+3   BMI          19416 non-null  float64  
+4   Age          19416 non-null  float64  
+5   OSA          19416 non-null  object    
+6   APOE_e4      19416 non-null  object    
+7   snoring      19416 non-null  object  
+8   centre       19416 non-null  object   
+9   f_25887_2_0  19416 non-null  float64  
+10  f_25886_2_0  19416 non-null  float64  
+11  f_25003_2_0  19416 non-null  float64  
+12  f_25004_2_0  19416 non-null  float64  
+13  f_25001_2_0  19416 non-null  float64  
+14  f_25002_2_0  19416 non-null  float64  
+15  f_25005_2_0  19416 non-null  float64  
+16  f_25006_2_0  19416 non-null  float64  
+17  f_25007_2_0  19416 non-null  float64  
+18  f_25008_2_0  19416 non-null  float64  
+19  f_25009_2_0  19416 non-null  float64  
+20  f_25010_2_0  19416 non-null  float64  
+21  f_25012_2_0  19416 non-null  float64  
+22  f_25011_2_0  19416 non-null  float64  
+23  f_25016_2_0  19416 non-null  float64  
+24  f_25015_2_0  19416 non-null  float64  
+25  f_25018_2_0  19416 non-null  float64  
+26  f_25017_2_0  19416 non-null  float64  
+27  f_25020_2_0  19416 non-null  float64  
+28  f_25019_2_0  19416 non-null  float64  
+29  f_25014_2_0  19416 non-null  float64  
+30  f_25013_2_0  19416 non-null  float64  
+31  f_25022_2_0  19416 non-null  float64  
+32  f_25021_2_0  19416 non-null  float64  
+33  f_25024_2_0  19416 non-null  float64  
+34  f_25023_2_0  19416 non-null  float64 
+dtypes: float64(30), object(5) memory usage: 5.3+ MB 
+```
+
+```         
+OSA 
+0    19280 
+1      136 
+Name: count, dtype: int64
 ```
 :::
 
