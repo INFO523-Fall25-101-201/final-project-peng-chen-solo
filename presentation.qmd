@@ -127,7 +127,7 @@ Gen. (-1.18) | Discrim. (-0.44): 100%|██████████| 1000/1000 
 
 ## Loss function
 
-![](results/ukb_synthesizer_osa_loss.png){fig-align="center"}
+![](images/ukb_synthesizer_osa_loss.png){fig-align="center"}
 :::
 
 ## 1. Generate synthetic data
@@ -240,7 +240,7 @@ print(X_transformed.shape)
 
 ## PCA
 
-![](results/pca.png){fig-align="center"}
+![](images/pca.png){fig-align="center"}
 :::
 
 ## 2. Train an optimal ML model
