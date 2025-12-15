@@ -176,7 +176,7 @@ Gen. (-1.18) | Discrim. (-0.44): 100%|██████████| 1000/1000 
 
 ## Loss function
 
-![](images/ukb_synthesizer_osa_loss.png){fig-align="center"}
+![](images/ukb_synthesizer_osa_loss.png){fig-align="center" width="682"}
 :::
 
 ## 1. Generate synthetic data
@@ -387,7 +387,7 @@ Confusion matrix:
 [  29    0]]
 ```
 
-## 4. Real x Synthetic cross validation
+## 4. Real x Synthetic cross-domain validation
 
 ::: panel-tabset
 ## Note
@@ -441,7 +441,7 @@ Confusion matrix:
 
 -   The model trained on real data apparently had a higher AUC (0.856) than synthetic model (0.849).
 
--   Real model identified every records as healthy controls (TP=0, FP=0).
+-   Real model identified every record as healthy control (TP=0, FP=0).
 
 -   In use case 2, the real model behaved the same.
 
